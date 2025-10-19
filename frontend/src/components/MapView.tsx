@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert } from '@/types/airspace';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import Legend from './Legend';
 
 interface MapViewProps {
   flightRoutes: FlightRoute[];
@@ -20,181 +19,89 @@ interface MapViewProps {
 
 const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [tokenSubmitted, setTokenSubmitted] = useState(false);
+  const map = useRef<L.Map | null>(null);
+  const layers = useRef<{ [key: string]: L.Layer }>({});
 
   useEffect(() => {
-    if (!mapContainer.current || !tokenSubmitted || !mapboxToken) return;
+    if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [-95, 37],
-      zoom: 4,
-    });
+    map.current = L.map(mapContainer.current).setView([54.5, -2], 6);
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | &copy; Ian Brumby <a href="https://crockwell.com" target="_blank">Crockwell Solutions</a>',
+      maxZoom: 19,
+    }).addTo(map.current);
 
     return () => {
       map.current?.remove();
+      map.current = null;
     };
-  }, [tokenSubmitted, mapboxToken]);
+  }, []);
 
   useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
+    if (!map.current) return;
 
-    // Clear existing markers and layers
-    const markers = document.querySelectorAll('.mapboxgl-marker');
-    markers.forEach(marker => marker.remove());
+    Object.values(layers.current).forEach(layer => layer.remove());
+    layers.current = {};
 
-    // Add flight routes
     if (filters.routes) {
-      flightRoutes.forEach((route, index) => {
-        const sourceId = `route-${route.id}`;
-        
-        if (map.current!.getSource(sourceId)) {
-          map.current!.removeLayer(`route-line-${route.id}`);
-          map.current!.removeSource(sourceId);
-        }
-
-        map.current!.addSource(sourceId, {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: route.points.map(p => [p.lon, p.lat]),
-            },
-          },
-        });
-
-        map.current!.addLayer({
-          id: `route-line-${route.id}`,
-          type: 'line',
-          source: sourceId,
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round',
-          },
-          paint: {
-            'line-color': '#34D399',
-            'line-width': 3,
-            'line-opacity': 0.8,
-          },
-        });
+      flightRoutes.forEach((route) => {
+        const polyline = L.polyline(
+          route.points.map(p => [p.lat, p.lon]),
+          { color: '#34D399', weight: 3, opacity: 0.8 }
+        ).addTo(map.current!);
+        layers.current[`route-${route.id}`] = polyline;
       });
     }
 
-    // Add airspace alerts
     if (filters.airspace) {
       airspaceAlerts.forEach((alert) => {
-        const sourceId = `airspace-${alert.id}`;
-        
-        if (map.current!.getSource(sourceId)) {
-          map.current!.removeLayer(`airspace-circle-${alert.id}`);
-          map.current!.removeSource(sourceId);
-        }
-
-        map.current!.addSource(sourceId, {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [alert.center.lon, alert.center.lat],
-            },
-          },
-        });
-
-        map.current!.addLayer({
-          id: `airspace-circle-${alert.id}`,
-          type: 'circle',
-          source: sourceId,
-          paint: {
-            'circle-radius': alert.radius * 100,
-            'circle-color': '#EF4444',
-            'circle-opacity': 0.3,
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#EF4444',
-          },
-        });
+        const circle = L.circle([alert.center.lat, alert.center.lon], {
+          radius: alert.radius * 1000,
+          color: '#EF4444',
+          fillColor: '#EF4444',
+          fillOpacity: 0.3,
+          weight: 2,
+        }).addTo(map.current!);
+        layers.current[`airspace-${alert.id}`] = circle;
       });
     }
 
-    // Add bird alerts
     if (filters.birds) {
       birdAlerts.forEach((alert) => {
-        const el = document.createElement('div');
-        el.className = 'w-4 h-4 rounded-full bg-alert-bird border-2 border-background pulse';
-        
-        new mapboxgl.Marker(el)
-          .setLngLat([alert.location.lon, alert.location.lat])
-          .addTo(map.current!);
+        const marker = L.circleMarker([alert.location.lat, alert.location.lon], {
+          radius: 8,
+          fillColor: 'hsl(var(--alert-bird))',
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
+          className: 'pulse',
+        }).addTo(map.current!);
+        layers.current[`bird-${alert.id}`] = marker;
       });
     }
 
-    // Add drone alerts
     if (filters.drones) {
       droneAlerts.forEach((alert) => {
-        const el = document.createElement('div');
-        el.className = 'w-4 h-4 rounded-full bg-alert-drone border-2 border-background pulse';
-        
-        new mapboxgl.Marker(el)
-          .setLngLat([alert.location.lon, alert.location.lat])
-          .addTo(map.current!);
+        const marker = L.circleMarker([alert.location.lat, alert.location.lon], {
+          radius: 8,
+          fillColor: 'hsl(var(--alert-drone))',
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
+          className: 'pulse',
+        }).addTo(map.current!);
+        layers.current[`drone-${alert.id}`] = marker;
       });
     }
   }, [flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters]);
 
-  if (!tokenSubmitted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="w-full max-w-md space-y-4 p-6">
-          <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-bold text-foreground">Enter Mapbox Token</h2>
-            <p className="text-sm text-muted-foreground">
-              Get your token from{' '}
-              <a
-                href="https://account.mapbox.com/access-tokens/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
-            <Input
-              id="mapbox-token"
-              type="text"
-              placeholder="pk.ey..."
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              className="bg-card"
-            />
-          </div>
-          <button
-            onClick={() => setTokenSubmitted(true)}
-            disabled={!mapboxToken}
-            className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-          >
-            Continue
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative h-screen w-full">
       <div ref={mapContainer} className="h-full w-full" />
+      <Legend />
       <style>{`
         .pulse {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
