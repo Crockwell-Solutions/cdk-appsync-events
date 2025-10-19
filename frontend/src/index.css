@@ -39,6 +39,7 @@ All colors MUST be HSL.
     --alert-airspace: 0 84% 60%;
     --alert-bird: 45 93% 47%;
     --alert-drone: 271 91% 65%;
+    --alert-thunderstorm: 280 100% 70%;
     --route: 142 76% 36%;
 
     --sidebar-background: 222 47% 11%;

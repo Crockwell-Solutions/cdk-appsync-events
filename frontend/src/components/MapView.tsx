@@ -1,18 +1,20 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, Point } from '@/types/airspace';
+import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, ThunderstormAlert, Point } from '@/types/airspace';
 
 interface MapViewProps {
   flightRoutes: FlightRoute[];
   airspaceAlerts: AirspaceAlert[];
   birdAlerts: BirdAlert[];
   droneAlerts: DroneAlert[];
+  thunderstormAlerts: ThunderstormAlert[];
   filters: {
     routes: boolean;
     airspace: boolean;
     birds: boolean;
     drones: boolean;
+    thunderstorms: boolean;
   };
   isCreatingRoute: boolean;
   routePoints: Point[];
@@ -20,7 +22,7 @@ interface MapViewProps {
   onPointDrag: (index: number, lat: number, lon: number) => void;
 }
 
-const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters, isCreatingRoute, routePoints, onMapClick, onPointDrag }: MapViewProps) => {
+const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunderstormAlerts, filters, isCreatingRoute, routePoints, onMapClick, onPointDrag }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layers = useRef<{ [key: string]: L.Layer }>({});
@@ -134,7 +136,22 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filter
         layers.current[`drone-${alert.id}`] = marker;
       });
     }
-  }, [flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters]);
+
+    if (filters.thunderstorms) {
+      thunderstormAlerts.forEach((alert) => {
+        const marker = L.circleMarker([alert.location.lat, alert.location.lon], {
+          radius: 8,
+          fillColor: 'hsl(var(--alert-thunderstorm))',
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
+          className: 'pulse',
+        }).addTo(map.current!);
+        layers.current[`thunderstorm-${alert.id}`] = marker;
+      });
+    }
+  }, [flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunderstormAlerts, filters]);
 
   useEffect(() => {
     if (!map.current) return;

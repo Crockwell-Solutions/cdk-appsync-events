@@ -30,4 +30,8 @@ export interface DroneAlert extends PointAlert {
   type: 'drone';
 }
 
-export type AlertData = FlightRoute | AirspaceAlert | BirdAlert | DroneAlert;
+export interface ThunderstormAlert extends PointAlert {
+  type: 'thunderstorm';
+}
+
+export type AlertData = FlightRoute | AirspaceAlert | BirdAlert | DroneAlert | ThunderstormAlert;

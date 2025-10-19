@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import MapView from '@/components/MapView';
 import ControlPanel from '@/components/ControlPanel';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, Point } from '@/types/airspace';
+import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, ThunderstormAlert, Point } from '@/types/airspace';
 import { toast } from 'sonner';
 import { loadConfig } from '@/config';
 import { apiClient } from '@/api/client';
@@ -16,12 +16,14 @@ const Index = () => {
   const [airspaceAlerts, setAirspaceAlerts] = useState<AirspaceAlert[]>([]);
   const [birdAlerts, setBirdAlerts] = useState<BirdAlert[]>([]);
   const [droneAlerts, setDroneAlerts] = useState<DroneAlert[]>([]);
+  const [thunderstormAlerts, setThunderstormAlerts] = useState<ThunderstormAlert[]>([]);
 
   const [filters, setFilters] = useState({
     routes: true,
     airspace: true,
     birds: true,
     drones: true,
+    thunderstorms: true,
   });
 
   const [isCreatingRoute, setIsCreatingRoute] = useState(false);
@@ -77,6 +79,15 @@ const Index = () => {
       };
       setDroneAlerts((prev) => [...prev, alert]);
       toast.info('Drone activity detected');
+    } else if (data.type === 'thunderstorm') {
+      const alert: ThunderstormAlert = {
+        id: data.id || `thunderstorm-${Date.now()}`,
+        type: 'thunderstorm',
+        location: data.location,
+        timestamp: Date.now(),
+      };
+      setThunderstormAlerts((prev) => [...prev, alert]);
+      toast.warning('Thunderstorm detected');
     }
   }, []);
 
@@ -162,6 +173,7 @@ const Index = () => {
         airspaceAlerts={airspaceAlerts}
         birdAlerts={birdAlerts}
         droneAlerts={droneAlerts}
+        thunderstormAlerts={thunderstormAlerts}
         filters={filters}
         isCreatingRoute={isCreatingRoute}
         routePoints={routePoints}
@@ -176,6 +188,7 @@ const Index = () => {
           airspace: airspaceAlerts.length,
           birds: birdAlerts.length,
           drones: droneAlerts.length,
+          thunderstorms: thunderstormAlerts.length,
         }}
         isConnected={isConnected}
         isCreatingRoute={isCreatingRoute}

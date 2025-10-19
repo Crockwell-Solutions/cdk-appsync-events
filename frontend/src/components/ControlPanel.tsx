@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from './ui/card';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
-import { Plane, AlertTriangle, Bird, Radio, ChevronDown, ChevronUp, Route, X, Check, Zap } from 'lucide-react';
+import { Plane, AlertTriangle, Bird, Radio, ChevronDown, ChevronUp, Route, X, Check, Zap, CloudLightning } from 'lucide-react';
 import { getConfig } from '@/config';
 import { toast } from 'sonner';
 
@@ -12,6 +12,7 @@ interface ControlPanelProps {
     airspace: boolean;
     birds: boolean;
     drones: boolean;
+    thunderstorms: boolean;
   };
   onFilterChange: (key: keyof ControlPanelProps['filters'], value: boolean) => void;
   stats: {
@@ -19,6 +20,7 @@ interface ControlPanelProps {
     airspace: number;
     birds: number;
     drones: number;
+    thunderstorms: number;
   };
   isConnected: boolean;
   isCreatingRoute: boolean;
@@ -134,6 +136,20 @@ const ControlPanel = ({ filters, onFilterChange, stats, isConnected, isCreatingR
               </div>
             </div>
             <div className={`h-3 w-3 rounded-full transition-colors ${filters.drones ? 'bg-green-500' : 'bg-gray-300'}`} />
+          </div>
+
+          <div 
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+            onClick={() => onFilterChange('thunderstorms', !filters.thunderstorms)}
+          >
+            <div className="flex items-center gap-3">
+              <CloudLightning className="h-5 w-5" style={{ color: 'hsl(280, 100%, 70%)' }} />
+              <div>
+                <div className="text-sm font-medium text-gray-800">Thunderstorms</div>
+                <div className="text-xs text-gray-500">{stats.thunderstorms} active</div>
+              </div>
+            </div>
+            <div className={`h-3 w-3 rounded-full transition-colors ${filters.thunderstorms ? 'bg-green-500' : 'bg-gray-300'}`} />
           </div>
           </div>
 
