@@ -26,6 +26,7 @@ interface ApiResourcesProps extends NestedStackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
   triggerHazardsFunction: NodejsFunction;
+  submitRouteFunction: NodejsFunction;
   allowedOrigins?: string[];
 }
 
@@ -36,7 +37,7 @@ export class ApiResources extends NestedStack {
   constructor(scope: Construct, id: string, props: ApiResourcesProps) {
     super(scope, id, props);
 
-    const { triggerHazardsFunction } = props;
+    const { triggerHazardsFunction, submitRouteFunction } = props;
 
     // Create the API Gateway
     this.api = new RestApi(this, 'AirspaceAlertsDemoApi', {
@@ -112,6 +113,12 @@ export class ApiResources extends NestedStack {
     // Add generate hazards endpoint
     const generateHazards = this.api.root.addResource('generate-hazards');
     generateHazards.addMethod('POST', new LambdaIntegration(triggerHazardsFunction), {
+      apiKeyRequired: true,
+    });
+
+    // Add submit route endpoint
+    const submitRoute = this.api.root.addResource('submit-route');
+    submitRoute.addMethod('POST', new LambdaIntegration(submitRouteFunction), {
       apiKeyRequired: true,
     });
 

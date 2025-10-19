@@ -22,6 +22,7 @@ interface LambdaResourcesProps extends NestedStackProps {
 
 export class LambdaResources extends NestedStack {
   public triggerHazardsFunction: NodejsFunction;
+  public submitRouteFunction: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaResourcesProps) {
     super(scope, id, props);
@@ -41,5 +42,19 @@ export class LambdaResources extends NestedStack {
       },
     }).lambda;
     airspaceAlerterTable.grantReadData(this.triggerHazardsFunction);
+
+    // Create the Submit Route Lambda function
+    this.submitRouteFunction = new CustomLambda(this, 'SubmitRouteFunction', {
+      envConfig: envConfig,
+      source: 'src/api/submit-route.ts',
+      environmentVariables: {
+        AIRSPACE_ALERTER_TABLE: airspaceAlerterTable.tableName,
+        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
+        PARTITION_KEY_SHARDS: envConfig.partitionKeyShards?.toString(),
+        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
+        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
+      },
+    }).lambda;
+    airspaceAlerterTable.grantReadWriteData(this.submitRouteFunction);
   }
 }

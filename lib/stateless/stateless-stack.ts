@@ -50,6 +50,7 @@ export class StatelessStack extends Stack {
       stage: stage,
       envConfig: envConfig,
       triggerHazardsFunction: this.lambdaResources.triggerHazardsFunction,
+      submitRouteFunction: this.lambdaResources.submitRouteFunction,
     });
 
     // cdk nag check and suppressions
