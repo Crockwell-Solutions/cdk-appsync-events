@@ -142,14 +142,14 @@ const ControlPanel = ({ filters, onFilterChange, stats, isConnected, isCreatingR
           {!isCreatingRoute ? (
             <div className="space-y-2">
               <Button
-                onClick={onStartRoute}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onStartRoute(); }}
                 className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 <Route className="h-4 w-4" />
                 Create Route
               </Button>
               <Button
-                onClick={handleGenerateHazards}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleGenerateHazards(); }}
                 disabled={loadingHazards}
                 className="w-full gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium"
               >
@@ -168,7 +168,7 @@ const ControlPanel = ({ filters, onFilterChange, stats, isConnected, isCreatingR
               </p>
               <div className="flex gap-2">
                 <Button
-                  onClick={onSubmitRoute}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSubmitRoute(); }}
                   disabled={routePointCount < 2}
                   className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium"
                   size="sm"
@@ -177,7 +177,7 @@ const ControlPanel = ({ filters, onFilterChange, stats, isConnected, isCreatingR
                   Submit
                 </Button>
                 <Button
-                  onClick={onCancelRoute}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCancelRoute(); }}
                   variant="outline"
                   className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-100"
                   size="sm"

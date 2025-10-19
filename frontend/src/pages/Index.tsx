@@ -124,6 +124,12 @@ const Index = () => {
 
     try {
       await apiClient.post('/submit-route', { points: routePoints });
+      const newRoute: FlightRoute = {
+        id: `route-${Date.now()}`,
+        points: routePoints,
+        timestamp: Date.now(),
+      };
+      setFlightRoutes((prev) => [...prev, newRoute]);
       toast.success('Route submitted successfully');
       setIsCreatingRoute(false);
       setRoutePoints([]);
