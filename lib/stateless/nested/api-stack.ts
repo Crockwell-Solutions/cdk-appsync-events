@@ -89,7 +89,7 @@ export class ApiResources extends NestedStack {
       physicalResourceId: PhysicalResourceId.of(`APIKey:${apiKey.keyId}`),
     };
 
-    const apiKeyCr = new AwsCustomResource(this, 'ApiKeyCr', {
+    const apiKeyCr = new AwsCustomResource(this, 'AirspaceAlerterApiKeyCr', {
       policy: AwsCustomResourcePolicy.fromStatements([
         new PolicyStatement({
           effect: Effect.ALLOW,
@@ -97,8 +97,8 @@ export class ApiResources extends NestedStack {
           actions: ['apigateway:GET'],
         }),
       ]),
-      logGroup: new LogGroup(this, 'ApiKeyCrLogGroup', {
-        logGroupName: '/aws/api/ApiKeyCrLogGroup',
+      logGroup: new LogGroup(this, 'AirspaceAlerterApiKeyCrLogGroup', {
+        logGroupName: '/aws/api/AirspaceAlerterApiKeyCrLogGroup',
         retention: RetentionDays.THREE_MONTHS,
         removalPolicy: RemovalPolicy.DESTROY,
       }),
@@ -116,7 +116,7 @@ export class ApiResources extends NestedStack {
     });
 
     // Save the API URL and key to the System Manager Parameter Store
-    new StringParameter(this, 'ApiUrlParameter', {
+    new StringParameter(this, 'AirspaceAlerterApiUrlParameter', {
       parameterName: props.envConfig.apiUrlParameterName || '/airspaceAlerts/apiUrl',
       stringValue: this.api.url,
     });

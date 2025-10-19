@@ -64,7 +64,6 @@ export class CustomTable extends Construct {
         pointInTimeRecoveryEnabled: true,
         recoveryPeriodInDays: 7,
       },
-      contributorInsightsEnabled: true,
       timeToLiveAttribute: 'ttl',
     };
 

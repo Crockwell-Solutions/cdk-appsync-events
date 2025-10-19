@@ -15,6 +15,7 @@ import { EnvironmentConfig, Stage } from '@config';
 import { LambdaResources } from './nested/lambda-stack';
 import { ApiResources } from './nested/api-stack';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import { EventResources } from './nested/events-stack';
 
 export interface StatelessStackProps extends StackProps {
   stage: Stage;
@@ -24,6 +25,7 @@ export interface StatelessStackProps extends StackProps {
 
 export class StatelessStack extends Stack {
   public lambdaResources: LambdaResources;
+  public eventResources: EventResources;
   public apiResources: ApiResources;
 
   constructor(scope: Construct, id: string, props: StatelessStackProps) {
@@ -35,6 +37,12 @@ export class StatelessStack extends Stack {
       stage: stage,
       envConfig: envConfig,
       airspaceAlerterTable: props.airspaceAlerterTable,
+    });
+
+    // Create the events nested stack
+    this.eventResources = new EventResources(this, 'AirspaceAlertsEventResources', {
+      stage: stage,
+      envConfig: envConfig,
     });
 
     // Create the API Gateway resources nested stack with CloudFront URL for CORS
@@ -96,5 +104,9 @@ export class StatelessStack extends Stack {
     // Output the Events API details
     new CfnOutput(this, 'restApiUrl', { value: this.apiResources.api.url });
     new CfnOutput(this, 'restApiKey', { value: this.apiResources.apiKeyValue });
+    new CfnOutput(this, 'eventsApiKey', { value: this.eventResources.eventsApi.apiKeys['Default'].attrApiKey });
+    new CfnOutput(this, 'eventsHttpDomain', { value: this.eventResources.eventsApi.httpDns });
+    new CfnOutput(this, 'eventsRealtimeDomain', { value: this.eventResources.eventsApi.realtimeDns });
+    new CfnOutput(this, 'eventsUrl', { value: `wss://${this.eventResources.eventsApi.realtimeDns}/event/realtime` });
   }
 }
