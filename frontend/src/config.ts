@@ -5,6 +5,8 @@ interface CdkOutput {
     restApiUrl?: string;
     restApiKey?: string;
     eventsUrl?: string;
+    eventsApiKey?: string;
+    eventsHttpDomain?: string;
   };
 }
 
@@ -12,6 +14,8 @@ interface AppConfig {
   restApiUrl: string;
   restApiKey: string;
   eventsUrl: string;
+  eventsApiKey: string;
+  eventsHttpDomain: string;
 }
 
 let config: AppConfig | null = null;
@@ -23,7 +27,7 @@ export const loadConfig = async (): Promise<AppConfig | null> => {
     const cdkOutput: CdkOutput = output;
     const stackOutput = cdkOutput.AirspaceAlerterStatelessStack;
 
-    if (!stackOutput?.restApiUrl || !stackOutput?.restApiKey || !stackOutput?.eventsUrl) {
+    if (!stackOutput?.restApiUrl || !stackOutput?.restApiKey || !stackOutput?.eventsUrl || !stackOutput?.eventsApiKey || !stackOutput?.eventsHttpDomain) {
       return null;
     }
 
@@ -31,6 +35,8 @@ export const loadConfig = async (): Promise<AppConfig | null> => {
       restApiUrl: stackOutput.restApiUrl,
       restApiKey: stackOutput.restApiKey,
       eventsUrl: stackOutput.eventsUrl,
+      eventsApiKey: stackOutput.eventsApiKey,
+      eventsHttpDomain: stackOutput.eventsHttpDomain,
     };
 
     return config;

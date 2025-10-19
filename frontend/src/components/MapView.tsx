@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert } from '@/types/airspace';
 import Legend from './Legend';
+import GenerateHazardsButton from './GenerateHazardsButton';
 
 interface MapViewProps {
   flightRoutes: FlightRoute[];
@@ -102,6 +103,7 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filter
     <div className="relative h-screen w-full">
       <div ref={mapContainer} className="h-full w-full" />
       <Legend />
+      <GenerateHazardsButton />
       <style>{`
         .pulse {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;

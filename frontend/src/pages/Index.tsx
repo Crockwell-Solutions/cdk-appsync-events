@@ -8,6 +8,8 @@ import { loadConfig } from '@/config';
 
 const Index = () => {
   const [wsUrl, setWsUrl] = useState<string>('');
+  const [wsApiKey, setWsApiKey] = useState<string>('');
+  const [wsHttpDomain, setWsHttpDomain] = useState<string>('');
   const [configLoading, setConfigLoading] = useState(true);
   const [flightRoutes, setFlightRoutes] = useState<FlightRoute[]>([]);
   const [airspaceAlerts, setAirspaceAlerts] = useState<AirspaceAlert[]>([]);
@@ -25,6 +27,8 @@ const Index = () => {
     loadConfig().then((config) => {
       if (config) {
         setWsUrl(config.eventsUrl);
+        setWsApiKey(config.eventsApiKey);
+        setWsHttpDomain(config.eventsHttpDomain);
       }
       setConfigLoading(false);
     });
@@ -74,8 +78,10 @@ const Index = () => {
 
   const { isConnected } = useWebSocket({
     url: wsUrl || '',
+    apiKey: wsApiKey || '',
+    httpDomain: wsHttpDomain || '',
     onMessage: handleWebSocketMessage,
-    enabled: !!wsUrl,
+    enabled: !!wsUrl && !!wsApiKey && !!wsHttpDomain,
   });
 
   const handleFilterChange = (key: keyof typeof filters, value: boolean) => {

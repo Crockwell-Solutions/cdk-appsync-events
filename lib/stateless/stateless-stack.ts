@@ -49,7 +49,7 @@ export class StatelessStack extends Stack {
     this.apiResources = new ApiResources(this, 'AirspaceAlerterApiResources', {
       stage: stage,
       envConfig: envConfig,
-      triggerAlertsFunction: this.lambdaResources.triggerAlertsFunction,
+      triggerHazardsFunction: this.lambdaResources.triggerHazardsFunction,
     });
 
     // cdk nag check and suppressions

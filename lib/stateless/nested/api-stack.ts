@@ -25,7 +25,7 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 interface ApiResourcesProps extends NestedStackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
-  triggerAlertsFunction: NodejsFunction;
+  triggerHazardsFunction: NodejsFunction;
   allowedOrigins?: string[];
 }
 
@@ -36,7 +36,7 @@ export class ApiResources extends NestedStack {
   constructor(scope: Construct, id: string, props: ApiResourcesProps) {
     super(scope, id, props);
 
-    const { triggerAlertsFunction } = props;
+    const { triggerHazardsFunction } = props;
 
     // Create the API Gateway
     this.api = new RestApi(this, 'AirspaceAlertsDemoApi', {
@@ -109,9 +109,9 @@ export class ApiResources extends NestedStack {
     apiKeyCr.node.addDependency(apiKey);
     this.apiKeyValue = apiKeyCr.getResponseField('value');
 
-    // Add generate alerts endpoint
-    const generateAlerts = this.api.root.addResource('generate-alerts');
-    generateAlerts.addMethod('POST', new LambdaIntegration(triggerAlertsFunction), {
+    // Add generate hazards endpoint
+    const generateHazards = this.api.root.addResource('generate-hazards');
+    generateHazards.addMethod('POST', new LambdaIntegration(triggerHazardsFunction), {
       apiKeyRequired: true,
     });
 

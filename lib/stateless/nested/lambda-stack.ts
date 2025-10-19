@@ -21,17 +21,17 @@ interface LambdaResourcesProps extends NestedStackProps {
 }
 
 export class LambdaResources extends NestedStack {
-  public triggerAlertsFunction: NodejsFunction;
+  public triggerHazardsFunction: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaResourcesProps) {
     super(scope, id, props);
 
     const { envConfig, airspaceAlerterTable } = props;
 
-    // Create the Trigger Alerts Lambda function
-    this.triggerAlertsFunction = new CustomLambda(this, 'TriggerAlertsFunction', {
+    // Create the Trigger Hazards Lambda function
+    this.triggerHazardsFunction = new CustomLambda(this, 'TriggerHazardsFunction', {
       envConfig: envConfig,
-      source: 'src/api/trigger-alerts.ts',
+      source: 'src/api/trigger-hazards.ts',
       environmentVariables: {
         AIRSPACE_ALERTER_TABLE: airspaceAlerterTable.tableName,
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
@@ -40,6 +40,6 @@ export class LambdaResources extends NestedStack {
         GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
-    airspaceAlerterTable.grantReadData(this.triggerAlertsFunction);
+    airspaceAlerterTable.grantReadData(this.triggerHazardsFunction);
   }
 }
