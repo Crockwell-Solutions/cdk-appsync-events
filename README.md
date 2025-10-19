@@ -73,16 +73,19 @@ The frontend application is built using React and Tailwind CSS, providing a inte
 - **Interactive Map**: Built with React Leaflet for smooth map interactions
 - 
 
-The app will connect to the deployed backend API using configuration from `src/cdk-output.json`.
+The app automatically loads configuration from `cdk-output.json` which includes:
+- REST API endpoint URL
+- REST API key for authentication
+- AppSync Events WebSocket URL for real-time updates
 
 To run locally:
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
-The frontend running locally will connect to the deployed backend API, which is configured with an output of the backend CDK deployment and written to the `frontend/src/cdk-output.json` file.
+The frontend will connect to the deployed backend API using configuration from `frontend/src/cdk-output.json`, which is automatically generated during backend deployment.
 
 ## 🛠 Backend Application
 
@@ -103,8 +106,8 @@ For VSCode users, the launch configurations are provided in `.vscode/launch.json
 The project uses CDK project (in Typescript) for infrastructure definition and deployment.
 
 The deployment is split into two CDK projects:
-- **Backend**: Contains the stateless and stateful stacks. The command `npm run deploy:backend` will deploy the backend CDK stacks. Following completion of the backend deployment, it will output the necessary API Gateway endpoint URLs to the `cdk-output.json` file in the `frontend/src` directory. This file is used by the frontend application to connect to the backend API.
-- **Frontend**: Contains the static hosting stack. The command `npm run deploy:frontend` will build the frontend React application and deploy the frontend application to an S3 bucket and configure CloudFront for content delivery.
+- **Backend**: Contains the stateless and stateful stacks. The command `npm run deploy:backend` will deploy the backend CDK stacks. Following completion of the backend deployment, it will output the REST API URL, API key, and AppSync Events WebSocket URL to the `cdk-output.json` file in the `frontend/src` directory. This file is used by the frontend application to connect to the backend services.
+- **Frontend**: Contains the static hosting stack. The command `npm run deploy:frontend` will copy the `cdk-output.json` to the public directory, build the frontend React application, and deploy it to an S3 bucket with CloudFront for content delivery.
 
 To deploy the entire application, you can run `npm run deploy` which will run both the backend and frontend deployments sequentially.
 

@@ -1,13 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import MapView from '@/components/MapView';
 import ControlPanel from '@/components/ControlPanel';
-import WebSocketConfig from '@/components/WebSocketConfig';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert } from '@/types/airspace';
 import { toast } from 'sonner';
+import { loadConfig } from '@/config';
 
 const Index = () => {
-  const [wsUrl, setWsUrl] = useState<string | null>(null);
+  const [wsUrl, setWsUrl] = useState<string>('');
+  const [configLoading, setConfigLoading] = useState(true);
   const [flightRoutes, setFlightRoutes] = useState<FlightRoute[]>([]);
   const [airspaceAlerts, setAirspaceAlerts] = useState<AirspaceAlert[]>([]);
   const [birdAlerts, setBirdAlerts] = useState<BirdAlert[]>([]);
@@ -19,6 +20,15 @@ const Index = () => {
     birds: true,
     drones: true,
   });
+
+  useEffect(() => {
+    loadConfig().then((config) => {
+      if (config) {
+        setWsUrl(config.eventsUrl);
+      }
+      setConfigLoading(false);
+    });
+  }, []);
 
   const handleWebSocketMessage = useCallback((data: any) => {
     console.log('Received WebSocket message:', data);
@@ -72,8 +82,20 @@ const Index = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  if (configLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-muted-foreground">Loading configuration...</div>
+      </div>
+    );
+  }
+
   if (!wsUrl) {
-    return <WebSocketConfig onConnect={setWsUrl} />;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-destructive">Configuration not found. Please deploy the backend first.</div>
+      </div>
+    );
   }
 
   return (

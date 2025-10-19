@@ -1,0 +1,7 @@
+{
+  "AirspaceAlerterStatelessStack": {
+    "restApiUrl": "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod/",
+    "restApiKey": "your-api-key-here",
+    "eventsUrl": "wss://xxxxxxxxxx.appsync-api.us-east-1.amazonaws.com/event/realtime"
+  }
+}
