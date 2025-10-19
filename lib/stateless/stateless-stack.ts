@@ -43,6 +43,7 @@ export class StatelessStack extends Stack {
     this.eventResources = new EventResources(this, 'AirspaceAlertsEventResources', {
       stage: stage,
       envConfig: envConfig,
+      airspaceAlerterTable: props.airspaceAlerterTable,
     });
 
     // Create the API Gateway resources nested stack with CloudFront URL for CORS

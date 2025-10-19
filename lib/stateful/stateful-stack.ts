@@ -10,7 +10,7 @@
 import { Stack, StackProps, Aspects } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
-import { Table, AttributeType } from 'aws-cdk-lib/aws-dynamodb';
+import { Table, AttributeType, StreamViewType } from 'aws-cdk-lib/aws-dynamodb';
 import { EnvironmentConfig, Stage, getRemovalPolicyFromStage } from '../../config';
 import { CustomTable } from '../constructs/custom-table';
 
@@ -47,6 +47,7 @@ export class StatefulStack extends Stack {
           sortKey: { name: 'GSI1SK', type: AttributeType.STRING },
         },
       ],
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
     }).table;
 
     // cdk nag check and suppressions

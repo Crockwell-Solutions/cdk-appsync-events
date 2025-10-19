@@ -12,10 +12,16 @@ import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { EnvironmentConfig, Stage } from '../../../config';
 import { AppSyncAuthorizationType, EventApi } from 'aws-cdk-lib/aws-appsync';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import { EventBus } from 'aws-cdk-lib/aws-events';
+import { Pipe } from '@aws-cdk/aws-pipes-alpha';
+import { DynamoDBSource, DynamoDBStartingPosition } from '@aws-cdk/aws-pipes-sources-alpha';
+import { EventBridgeTarget } from '@aws-cdk/aws-pipes-targets-alpha';
 
 interface EventResourcesProps extends NestedStackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
+  airspaceAlerterTable: Table;
 }
 
 export class EventResources extends NestedStack {
@@ -25,6 +31,9 @@ export class EventResources extends NestedStack {
   constructor(scope: Construct, id: string, props: EventResourcesProps) {
     super(scope, id, props);
 
+    // Create a custom event bus for the airspace alerter demo
+    const eventBus = new EventBus(this, 'AirspaceAlerterEventBus');
+
     // Create the AppSync Events Websocket API
     const apiKeyProvider = { authorizationType: AppSyncAuthorizationType.API_KEY };
 
@@ -32,6 +41,17 @@ export class EventResources extends NestedStack {
     this.eventsApi = new EventApi(this, 'AirspaceAlerterEventsApi', {
       apiName: 'AirspaceAlertsEvents',
       authorizationConfig: { authProviders: [apiKeyProvider] },
+    });
+
+    // Add the EventBridge data source to the Events API
+    this.eventsApi.addEventBridgeDataSource('AirspaceAlerterEventBridgeDataSource', eventBus);
+
+    // Create the EventBridge Pipe that will process new hazard events from DynamoDB stream and publish to AppSync Events API
+    new Pipe(this, 'HazardEventsPipe', {
+      source: new DynamoDBSource(props.airspaceAlerterTable, {
+        startingPosition: DynamoDBStartingPosition.LATEST,
+      }),
+      target: new EventBridgeTarget(eventBus),
     });
 
     // add a channel namespace called `alerts`
