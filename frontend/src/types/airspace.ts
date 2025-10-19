@@ -24,14 +24,17 @@ export interface PointAlert {
 
 export interface BirdAlert extends PointAlert {
   type: 'bird';
+  isNew?: boolean;
 }
 
 export interface DroneAlert extends PointAlert {
   type: 'drone';
+  isNew?: boolean;
 }
 
 export interface ThunderstormAlert extends PointAlert {
   type: 'thunderstorm';
+  isNew?: boolean;
 }
 
 export type AlertData = FlightRoute | AirspaceAlert | BirdAlert | DroneAlert | ThunderstormAlert;

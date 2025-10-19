@@ -43,51 +43,98 @@ const Index = () => {
   const handleWebSocketMessage = useCallback((data: any) => {
     console.log('Received WebSocket message:', data);
 
-    // Parse incoming data based on type
+    // Handle new Hazard event format
+    if (data.type === 'data' && data.event) {
+      try {
+        const event = JSON.parse(data.event);
+        if (event.type === 'Hazard' && event.data) {
+          const hazardType = event.data.type;
+          const location = { lat: event.data.lat, lon: event.data.lon };
+          const alertId = data.id || `${hazardType}-${Date.now()}`;
+
+          if (hazardType === 'Airspace Alert') {
+            setAirspaceAlerts((prev) => {
+              if (prev.some(a => a.id === alertId)) return prev;
+              const alert: AirspaceAlert = { id: alertId, center: location, radius: 50, timestamp: Date.now() };
+              toast.warning('Airspace alert detected');
+              return [...prev, alert];
+            });
+          } else if (hazardType === 'Bird Activity') {
+            setBirdAlerts((prev) => {
+              if (prev.some(a => a.id === alertId)) return prev;
+              const alert: BirdAlert = { id: alertId, type: 'bird', location, timestamp: Date.now(), isNew: true };
+              toast.info('Bird activity detected');
+              setTimeout(() => {
+                setBirdAlerts((p) => p.map(a => a.id === alertId ? { ...a, isNew: false } : a));
+              }, 5000);
+              return [...prev, alert];
+            });
+          } else if (hazardType === 'Drone Activity') {
+            setDroneAlerts((prev) => {
+              if (prev.some(a => a.id === alertId)) return prev;
+              const alert: DroneAlert = { id: alertId, type: 'drone', location, timestamp: Date.now(), isNew: true };
+              toast.info('Drone activity detected');
+              setTimeout(() => {
+                setDroneAlerts((p) => p.map(a => a.id === alertId ? { ...a, isNew: false } : a));
+              }, 5000);
+              return [...prev, alert];
+            });
+          } else if (hazardType === 'Thunderstorm') {
+            setThunderstormAlerts((prev) => {
+              if (prev.some(a => a.id === alertId)) return prev;
+              const alert: ThunderstormAlert = { id: alertId, type: 'thunderstorm', location, timestamp: Date.now(), isNew: true };
+              toast.warning('Thunderstorm detected');
+              setTimeout(() => {
+                setThunderstormAlerts((p) => p.map(a => a.id === alertId ? { ...a, isNew: false } : a));
+              }, 5000);
+              return [...prev, alert];
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing Hazard event:', error);
+      }
+    }
+
+    // Legacy format support
     if (data.type === 'flight_route') {
-      const route: FlightRoute = {
-        id: data.id || `route-${Date.now()}`,
-        points: data.points,
-        timestamp: Date.now(),
-      };
-      setFlightRoutes((prev) => [...prev, route]);
-      toast.info('New flight route detected');
+      setFlightRoutes((prev) => {
+        const id = data.id || `route-${Date.now()}`;
+        if (prev.some(r => r.id === id)) return prev;
+        toast.info('New flight route detected');
+        return [...prev, { id, points: data.points, timestamp: Date.now() }];
+      });
     } else if (data.type === 'airspace_alert') {
-      const alert: AirspaceAlert = {
-        id: data.id || `airspace-${Date.now()}`,
-        center: data.center,
-        radius: data.radius || 50,
-        timestamp: Date.now(),
-      };
-      setAirspaceAlerts((prev) => [...prev, alert]);
-      toast.warning('Airspace alert detected');
+      setAirspaceAlerts((prev) => {
+        const id = data.id || `airspace-${Date.now()}`;
+        if (prev.some(a => a.id === id)) return prev;
+        toast.warning('Airspace alert detected');
+        return [...prev, { id, center: data.center, radius: data.radius || 50, timestamp: Date.now() }];
+      });
     } else if (data.type === 'bird') {
-      const alert: BirdAlert = {
-        id: data.id || `bird-${Date.now()}`,
-        type: 'bird',
-        location: data.location,
-        timestamp: Date.now(),
-      };
-      setBirdAlerts((prev) => [...prev, alert]);
-      toast.info('Bird activity detected');
+      setBirdAlerts((prev) => {
+        const id = data.id || `bird-${Date.now()}`;
+        if (prev.some(a => a.id === id)) return prev;
+        toast.info('Bird activity detected');
+        setTimeout(() => setBirdAlerts((p) => p.map(a => a.id === id ? { ...a, isNew: false } : a)), 5000);
+        return [...prev, { id, type: 'bird', location: data.location, timestamp: Date.now(), isNew: true }];
+      });
     } else if (data.type === 'drone') {
-      const alert: DroneAlert = {
-        id: data.id || `drone-${Date.now()}`,
-        type: 'drone',
-        location: data.location,
-        timestamp: Date.now(),
-      };
-      setDroneAlerts((prev) => [...prev, alert]);
-      toast.info('Drone activity detected');
+      setDroneAlerts((prev) => {
+        const id = data.id || `drone-${Date.now()}`;
+        if (prev.some(a => a.id === id)) return prev;
+        toast.info('Drone activity detected');
+        setTimeout(() => setDroneAlerts((p) => p.map(a => a.id === id ? { ...a, isNew: false } : a)), 5000);
+        return [...prev, { id, type: 'drone', location: data.location, timestamp: Date.now(), isNew: true }];
+      });
     } else if (data.type === 'thunderstorm') {
-      const alert: ThunderstormAlert = {
-        id: data.id || `thunderstorm-${Date.now()}`,
-        type: 'thunderstorm',
-        location: data.location,
-        timestamp: Date.now(),
-      };
-      setThunderstormAlerts((prev) => [...prev, alert]);
-      toast.warning('Thunderstorm detected');
+      setThunderstormAlerts((prev) => {
+        const id = data.id || `thunderstorm-${Date.now()}`;
+        if (prev.some(a => a.id === id)) return prev;
+        toast.warning('Thunderstorm detected');
+        setTimeout(() => setThunderstormAlerts((p) => p.map(a => a.id === id ? { ...a, isNew: false } : a)), 5000);
+        return [...prev, { id, type: 'thunderstorm', location: data.location, timestamp: Date.now(), isNew: true }];
+      });
     }
   }, []);
 
