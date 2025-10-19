@@ -23,6 +23,7 @@ interface LambdaResourcesProps extends NestedStackProps {
 export class LambdaResources extends NestedStack {
   public triggerHazardsFunction: NodejsFunction;
   public submitRouteFunction: NodejsFunction;
+  public hazardsEnrichmentFunction: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaResourcesProps) {
     super(scope, id, props);
@@ -41,7 +42,7 @@ export class LambdaResources extends NestedStack {
         GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
-    airspaceAlerterTable.grantReadData(this.triggerHazardsFunction);
+    airspaceAlerterTable.grantReadWriteData(this.triggerHazardsFunction);
 
     // Create the Submit Route Lambda function
     this.submitRouteFunction = new CustomLambda(this, 'SubmitRouteFunction', {
@@ -56,5 +57,19 @@ export class LambdaResources extends NestedStack {
       },
     }).lambda;
     airspaceAlerterTable.grantReadWriteData(this.submitRouteFunction);
+
+    // Create the Hazards enrichment Lambda function that will be used by EventBridge Pipes
+    this.hazardsEnrichmentFunction = new CustomLambda(this, 'HazardsEnrichmentFunction', {
+      envConfig: envConfig,
+      source: 'src/event-processing/hazard-enrichment.ts',
+      environmentVariables: {
+        AIRSPACE_ALERTER_TABLE: airspaceAlerterTable.tableName,
+        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
+        PARTITION_KEY_SHARDS: envConfig.partitionKeyShards?.toString(),
+        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
+        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
+      },
+    }).lambda;
+    airspaceAlerterTable.grantReadData(this.hazardsEnrichmentFunction);
   }
 }

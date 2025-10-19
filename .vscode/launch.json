@@ -44,6 +44,30 @@
           "${workspaceFolder}/local.env.json"
         ]
       }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "Enrich Hazard",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "event-processing/hazard-enrichment.handler"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/event-processing/hazard-enrichment.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
     }
   ]
 }

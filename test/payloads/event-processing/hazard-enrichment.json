@@ -1,0 +1,53 @@
+[
+  {
+    "eventID": "5457d38bad03bff93fc4205bfd864078",
+    "eventName": "INSERT",
+    "eventVersion": "1.1",
+    "eventSource": "aws:dynamodb",
+    "awsRegion": "eu-west-1",
+    "dynamodb": {
+      "ApproximateCreationDateTime": 1760906953,
+      "Keys": {
+        "SK": {
+          "S": "HAZARD#01K7Z3QGJTSKC01V97EYWTDP22"
+        },
+        "PK": {
+          "S": "HAZARD"
+        }
+      },
+      "NewImage": {
+        "GSI1PK": {
+          "S": "u135"
+        },
+        "GSI1SK": {
+          "S": "HAZARD#01K7Z3QGJTSKC01V97EYWTDP22"
+        },
+        "SK": {
+          "S": "HAZARD#01K7Z3QGJTSKC01V97EYWTDP22"
+        },
+        "lon": {
+          "N": "1.6157035867218745"
+        },
+        "PK": {
+          "S": "HAZARD"
+        },
+        "type": {
+          "S": "Bird Activity"
+        },
+        "ttl": {
+          "N": "1760910553"
+        },
+        "lat": {
+          "N": "52.64393039719842"
+        },
+        "timestamp": {
+          "N": "1760906953306"
+        }
+      },
+      "SequenceNumber": "173400001483779008548923",
+      "SizeBytes": 203,
+      "StreamViewType": "NEW_AND_OLD_IMAGES"
+    },
+    "eventSourceARN": "arn:aws:dynamodb:eu-west-1:12345678012:table/AirspaceAlerterTable/stream/2025-10-19T19:57:38.068"
+  }
+]

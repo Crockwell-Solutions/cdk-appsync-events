@@ -44,6 +44,7 @@ export class StatelessStack extends Stack {
       stage: stage,
       envConfig: envConfig,
       airspaceAlerterTable: props.airspaceAlerterTable,
+      hazardsEnrichmentFunction: this.lambdaResources.hazardsEnrichmentFunction,
     });
 
     // Create the API Gateway resources nested stack with CloudFront URL for CORS
