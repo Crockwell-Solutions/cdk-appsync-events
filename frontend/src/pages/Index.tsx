@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import MapView from '@/components/MapView';
 import ControlPanel from '@/components/ControlPanel';
-import RouteCreator from '@/components/RouteCreator';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, Point } from '@/types/airspace';
 import { toast } from 'sonner';
@@ -173,13 +172,11 @@ const Index = () => {
           drones: droneAlerts.length,
         }}
         isConnected={isConnected}
-      />
-      <RouteCreator
-        isCreating={isCreatingRoute}
-        pointCount={routePoints.length}
-        onStart={handleStartRouteCreation}
-        onCancel={handleCancelRouteCreation}
-        onSubmit={handleSubmitRoute}
+        isCreatingRoute={isCreatingRoute}
+        routePointCount={routePoints.length}
+        onStartRoute={handleStartRouteCreation}
+        onCancelRoute={handleCancelRouteCreation}
+        onSubmitRoute={handleSubmitRoute}
       />
     </div>
   );
