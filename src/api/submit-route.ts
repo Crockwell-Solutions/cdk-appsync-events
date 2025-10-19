@@ -8,7 +8,7 @@
  * This software is licensed under the GNU General Public License v3.0.
  */
 
-import { logger, Point, getRouteDistance, RETURN_HEADERS } from '../shared';
+import { logger, Point, getRouteDistance, RETURN_HEADERS, createRouteRecord } from '../shared';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
@@ -16,20 +16,22 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 const client = new DynamoDBClient({});
 const ddb = DynamoDBDocumentClient.from(client);
 
-// Load environment variables
-const PARTITION_KEY_HASH_PRECISION = parseFloat(process.env.PARTITION_KEY_HASH_PRECISION || '5');
-
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   logger.info('Processing new flight route', { event });
 
   // Save the route to DynamoDB
-  const routePoints = JSON.parse(event.body || '[]') as Point[];
+  const routePoints = JSON.parse(event.body || '[]').points as Point[];
 
   // Evaluate the route
   const routeDistance = await getRouteDistance(routePoints);
+  logger.info('Calculated route distance', { routeDistance });
+
+  // Save the route to DynamoDB as type 'Route'
+  const routeId = await createRouteRecord(ddb, routePoints);
 
   return {
     body: JSON.stringify({
+      routeId: routeId,
       routeDistance: routeDistance,
     }),
     ...RETURN_HEADERS,

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert } from '@/types/airspace';
+import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, Point } from '@/types/airspace';
 import Legend from './Legend';
 import GenerateHazardsButton from './GenerateHazardsButton';
 
@@ -16,12 +16,18 @@ interface MapViewProps {
     birds: boolean;
     drones: boolean;
   };
+  isCreatingRoute: boolean;
+  routePoints: Point[];
+  onMapClick: (lat: number, lon: number) => void;
+  onPointDrag: (index: number, lat: number, lon: number) => void;
 }
 
-const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters }: MapViewProps) => {
+const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters, isCreatingRoute, routePoints, onMapClick, onPointDrag }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layers = useRef<{ [key: string]: L.Layer }>({});
+  const routeMarkers = useRef<L.Marker[]>([]);
+  const routeLine = useRef<L.Polyline | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -33,11 +39,17 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filter
       maxZoom: 19,
     }).addTo(map.current);
 
+    map.current.on('click', (e: L.LeafletMouseEvent) => {
+      if (isCreatingRoute) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    });
+
     return () => {
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [isCreatingRoute, onMapClick]);
 
   useEffect(() => {
     if (!map.current) return;
@@ -98,6 +110,42 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filter
       });
     }
   }, [flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, filters]);
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    routeMarkers.current.forEach(marker => marker.remove());
+    routeMarkers.current = [];
+    routeLine.current?.remove();
+    routeLine.current = null;
+
+    if (isCreatingRoute && routePoints.length > 0) {
+      routePoints.forEach((point, index) => {
+        const marker = L.marker([point.lat, point.lon], {
+          draggable: true,
+          icon: L.divIcon({
+            className: 'route-marker',
+            html: `<div style="background: #3B82F6; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${index + 1}</div>`,
+            iconSize: [24, 24],
+          }),
+        }).addTo(map.current!);
+
+        marker.on('drag', (e: L.DragEndEvent) => {
+          const pos = (e.target as L.Marker).getLatLng();
+          onPointDrag(index, pos.lat, pos.lng);
+        });
+
+        routeMarkers.current.push(marker);
+      });
+
+      if (routePoints.length > 1) {
+        routeLine.current = L.polyline(
+          routePoints.map(p => [p.lat, p.lon]),
+          { color: '#3B82F6', weight: 3, opacity: 0.8, dashArray: '10, 5' }
+        ).addTo(map.current!);
+      }
+    }
+  }, [isCreatingRoute, routePoints, onPointDrag]);
 
   return (
     <div className="relative h-screen w-full">

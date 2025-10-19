@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import MapView from '@/components/MapView';
 import ControlPanel from '@/components/ControlPanel';
+import RouteCreator from '@/components/RouteCreator';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert } from '@/types/airspace';
+import { FlightRoute, AirspaceAlert, BirdAlert, DroneAlert, Point } from '@/types/airspace';
 import { toast } from 'sonner';
 import { loadConfig } from '@/config';
+import { apiClient } from '@/api/client';
 
 const Index = () => {
   const [wsUrl, setWsUrl] = useState<string>('');
@@ -22,6 +24,9 @@ const Index = () => {
     birds: true,
     drones: true,
   });
+
+  const [isCreatingRoute, setIsCreatingRoute] = useState(false);
+  const [routePoints, setRoutePoints] = useState<Point[]>([]);
 
   useEffect(() => {
     loadConfig().then((config) => {
@@ -88,6 +93,47 @@ const Index = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleStartRouteCreation = () => {
+    setIsCreatingRoute(true);
+    setRoutePoints([]);
+  };
+
+  const handleCancelRouteCreation = () => {
+    setIsCreatingRoute(false);
+    setRoutePoints([]);
+  };
+
+  const handleMapClick = useCallback((lat: number, lon: number) => {
+    if (isCreatingRoute) {
+      setRoutePoints((prev) => [...prev, { lat, lon }]);
+    }
+  }, [isCreatingRoute]);
+
+  const handlePointDrag = useCallback((index: number, lat: number, lon: number) => {
+    setRoutePoints((prev) => {
+      const updated = [...prev];
+      updated[index] = { lat, lon };
+      return updated;
+    });
+  }, []);
+
+  const handleSubmitRoute = async () => {
+    if (routePoints.length < 2) {
+      toast.error('Route must have at least 2 points');
+      return;
+    }
+
+    try {
+      await apiClient.post('/submit-route', { points: routePoints });
+      toast.success('Route submitted successfully');
+      setIsCreatingRoute(false);
+      setRoutePoints([]);
+    } catch (error) {
+      toast.error('Failed to submit route');
+      console.error('Route submission error:', error);
+    }
+  };
+
   if (configLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -112,6 +158,10 @@ const Index = () => {
         birdAlerts={birdAlerts}
         droneAlerts={droneAlerts}
         filters={filters}
+        isCreatingRoute={isCreatingRoute}
+        routePoints={routePoints}
+        onMapClick={handleMapClick}
+        onPointDrag={handlePointDrag}
       />
       <ControlPanel
         filters={filters}
@@ -123,6 +173,13 @@ const Index = () => {
           drones: droneAlerts.length,
         }}
         isConnected={isConnected}
+      />
+      <RouteCreator
+        isCreating={isCreatingRoute}
+        pointCount={routePoints.length}
+        onStart={handleStartRouteCreation}
+        onCancel={handleCancelRouteCreation}
+        onSubmit={handleSubmitRoute}
       />
     </div>
   );

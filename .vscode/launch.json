@@ -9,10 +9,37 @@
         "target": "code",
         "architecture": "arm64",
         "projectRoot": "dist",
-        "lambdaHandler": "data-loading/generate-alert-data.handler"
+        "lambdaHandler": "api/trigger-hazards.handler"
       },
       "lambda": {
-        "runtime": "nodejs22.x"
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/api/trigger-hazards.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "Submit Route",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "api/submit-route.handler"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/api/submit-route.json"
+        }
       },
       "sam": {
         "localArguments": [

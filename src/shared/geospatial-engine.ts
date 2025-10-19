@@ -10,12 +10,13 @@
  */
 
 import * as geohash from 'ngeohash';
+import { ulid } from 'ulid';
 import { GeospatialConfig, GEOSPATIAL_QUERIES } from '../../config/geospatial-config';
 import { logger, chunkArray, getAllShardPrefixes } from '.';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { getDistance, getRhumbLineBearing, computeDestinationPoint, getDistanceFromLine } from 'geolib';
 
-const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
+const AIRSPACE_ALERTER_TABLE = process.env.AIRSPACE_ALERTER_TABLE;
 const PARTITION_KEY_HASH_PRECISION = parseInt(process.env.PARTITION_KEY_HASH_PRECISION || '1');
 const PARTITION_KEY_SHARDS = parseInt(process.env.PARTITION_KEY_SHARDS || '10');
 const GSI_HASH_PRECISION = parseInt(process.env.GSI_HASH_PRECISION || '4');
@@ -239,7 +240,7 @@ export async function performGeospatialQueryCommand(
   const returnData: any[] = [];
 
   const queryInput: any = {
-    TableName: SPATIAL_DATA_TABLE,
+    TableName: AIRSPACE_ALERTER_TABLE,
     Limit: queryLimit,
   };
 
@@ -388,4 +389,29 @@ export function getDistributedPoints<T extends { lat: number; lon: number }>(poi
   }
 
   return result.slice(0, limit);
+}
+
+/**
+ * Creates a new route record in the DynamoDB table with a unique route ID.
+ *
+ * @param ddb - The DynamoDBDocumentClient instance used to interact with DynamoDB.
+ * @param route - An array of `Point` objects representing the route to be stored.
+ * @returns A promise that resolves to the generated route ID as a string.
+ *
+ * @remarks
+ * The route record will have a TTL (time-to-live) of 7 days from the time of creation.
+ */
+export async function createRouteRecord(ddb: DynamoDBDocumentClient, route: Array<Point>): Promise<string> {
+  const routeId = ulid();
+  const params = new PutCommand({
+    TableName: AIRSPACE_ALERTER_TABLE,
+    Item: {
+      PK: 'ROUTE',
+      SK: `ROUTE#${routeId}`,
+      routePoints: route,
+      ttl: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days TTL
+    },
+  });
+  await ddb.send(params);
+  return routeId;
 }
