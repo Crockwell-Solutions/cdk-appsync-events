@@ -40,13 +40,6 @@ export class StatefulStack extends Stack {
         name: 'SK',
         type: AttributeType.STRING,
       },
-      globalSecondaryIndexes: [
-        {
-          indexName: 'GSI1',
-          partitionKey: { name: 'GSI1PK', type: AttributeType.STRING },
-          sortKey: { name: 'GSI1SK', type: AttributeType.STRING },
-        },
-      ],
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
     }).table;
 

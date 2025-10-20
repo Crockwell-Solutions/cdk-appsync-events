@@ -68,20 +68,3 @@ export function getRandomShardPrefix(prefixes: number = 10): string {
   const randomIndex = Math.floor(Math.random() * prefixes) + 1;
   return `S${randomIndex}`;
 }
-
-/**
- * Generates an array of shard key prefixes in the format "S1", "S2", ..., "Sn".
- *
- * @param prefixes - The number of shard key prefixes to generate. Defaults to 10.
- * @returns An array of shard key prefix strings.
- */
-export function getAllShardPrefixes(prefixes: number = 10, hash: string = ''): string[] {
-  const shardKeys: string[] = [];
-  for (let i = 1; i <= prefixes; i++) {
-    shardKeys.push(`S${i}`);
-  }
-  if (hash) {
-    return shardKeys.map((key) => `${key}#${hash}`);
-  }
-  return shardKeys;
-}

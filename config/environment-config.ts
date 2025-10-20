@@ -25,10 +25,6 @@ export interface EnvironmentConfig {
   apiUrlParameterName?: string;
   apiKeyParameterName?: string;
   dataTableName?: string;
-  partitionKeyHashPrecision?: number;
-  partitionKeyShards?: number;
-  sortKeyHashPrecision?: number;
-  gsiHashPrecision?: number;
   maximumResponseRecords?: number;
   alertTtlSeconds?: number;
 }
@@ -51,10 +47,6 @@ const defaultConfig: EnvironmentConfig = {
   apiUrlParameterName: '/airspaceAlerts/apiUrl',
   apiKeyParameterName: '/airspaceAlerts/apiKey',
   dataTableName: 'AirspaceAlerterTable',
-  partitionKeyHashPrecision: 1, // Approx 1000km resolution for partitioning
-  partitionKeyShards: 10, // Number of shards for allocating into random shards within the partition
-  sortKeyHashPrecision: 8, // Approx 50m resolution for sorting
-  gsiHashPrecision: 4, // Approx 40km resolution for GSI partitioning
   maximumResponseRecords: 100, // Total maximum responses in an API query
   alertTtlSeconds: 3600, // 1 hour in seconds
 };

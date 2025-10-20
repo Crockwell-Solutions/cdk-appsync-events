@@ -36,10 +36,6 @@ export class LambdaResources extends NestedStack {
       source: 'src/api/trigger-hazards.ts',
       environmentVariables: {
         AIRSPACE_ALERTER_TABLE: airspaceAlerterTable.tableName,
-        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
-        PARTITION_KEY_SHARDS: envConfig.partitionKeyShards?.toString(),
-        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
-        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     airspaceAlerterTable.grantReadWriteData(this.triggerHazardsFunction);
@@ -50,10 +46,6 @@ export class LambdaResources extends NestedStack {
       source: 'src/api/submit-route.ts',
       environmentVariables: {
         AIRSPACE_ALERTER_TABLE: airspaceAlerterTable.tableName,
-        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
-        PARTITION_KEY_SHARDS: envConfig.partitionKeyShards?.toString(),
-        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
-        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     airspaceAlerterTable.grantReadWriteData(this.submitRouteFunction);
@@ -64,10 +56,6 @@ export class LambdaResources extends NestedStack {
       source: 'src/event-processing/hazard-enrichment.ts',
       environmentVariables: {
         AIRSPACE_ALERTER_TABLE: airspaceAlerterTable.tableName,
-        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
-        PARTITION_KEY_SHARDS: envConfig.partitionKeyShards?.toString(),
-        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
-        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     airspaceAlerterTable.grantReadData(this.hazardsEnrichmentFunction);

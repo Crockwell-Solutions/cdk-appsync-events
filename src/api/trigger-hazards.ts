@@ -10,11 +10,9 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { logger, RETURN_HEADERS } from '../shared';
-import * as geohash from 'ngeohash';
 import { ulid } from 'ulid';
 
 const AIRSPACE_ALERTER_TABLE = process.env.AIRSPACE_ALERTER_TABLE;
-const GSI_HASH_PRECISION = parseInt(process.env.GSI_HASH_PRECISION || '4');
 
 const client = new DynamoDBClient({});
 const ddb = DynamoDBDocumentClient.from(client);
@@ -40,14 +38,13 @@ function getRandomHazardType() {
 }
 
 function getRandomDelay() {
-  return (2 + Math.random() * 5) * 1000; // 2-7 seconds in milliseconds
+  return (1 + Math.random() * 3) * 1000; // 1-4 seconds in milliseconds
 }
 
 async function createHazard() {
   const hazardId = ulid();
   const location = getRandomUKLocation();
   const hazardType = getRandomHazardType();
-  const gsiHash = geohash.encode(location.lat, location.lon, GSI_HASH_PRECISION);
 
   await ddb.send(
     new PutCommand({
@@ -55,8 +52,6 @@ async function createHazard() {
       Item: {
         PK: 'HAZARD',
         SK: `HAZARD#${hazardId}`,
-        GSI1PK: gsiHash,
-        GSI1SK: `HAZARD#${hazardId}`,
         type: hazardType,
         lat: location.lat,
         lon: location.lon,
@@ -73,7 +68,7 @@ export const handler = async () => {
   logger.info('Starting hazard simulation for 1 minute');
 
   const startTime = Date.now();
-  const endTime = startTime + 60000; // 1 minute
+  const endTime = startTime + 20000; // 20 seconds
   let hazardCount = 0;
 
   while (Date.now() < endTime) {

@@ -110,9 +110,10 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
     if (filters.birds) {
       birdAlerts.forEach((alert) => {
         const icon = L.divIcon({
-          className: alert.isNew ? 'hazard-marker flash-in' : 'hazard-marker pulse',
-          html: `<div style="background: hsl(45, 93%, 47%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg></div>`,
+          className: 'hazard-marker',
+          html: `<div class="${alert.isNew ? 'flash-in' : 'pulse'}" style="background: hsl(45, 93%, 47%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg></div>`,
           iconSize: [32, 32],
+          iconAnchor: [16, 16],
         });
         const marker = L.marker([alert.location.lat, alert.location.lon], { icon }).addTo(map.current!);
         layers.current[`bird-${alert.id}`] = marker;
@@ -122,9 +123,10 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
     if (filters.drones) {
       droneAlerts.forEach((alert) => {
         const icon = L.divIcon({
-          className: alert.isNew ? 'hazard-marker flash-in' : 'hazard-marker pulse',
-          html: `<div style="background: hsl(271, 91%, 65%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.04 4.05A10 10 0 1 1 19.96 19.95A10 10 0 0 1 4.04 4.05z"/><path d="M13.34 8.5l-5 2.5 5 2.5 2.5 5 2.5-5 5-2.5-5-2.5-2.5-5z"/></svg></div>`,
+          className: 'hazard-marker',
+          html: `<div class="${alert.isNew ? 'flash-in' : 'pulse'}" style="background: hsl(271, 91%, 65%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.04 4.05A10 10 0 1 1 19.96 19.95A10 10 0 0 1 4.04 4.05z"/><path d="M13.34 8.5l-5 2.5 5 2.5 2.5 5 2.5-5 5-2.5-5-2.5-2.5-5z"/></svg></div>`,
           iconSize: [32, 32],
+          iconAnchor: [16, 16],
         });
         const marker = L.marker([alert.location.lat, alert.location.lon], { icon }).addTo(map.current!);
         layers.current[`drone-${alert.id}`] = marker;
@@ -134,9 +136,10 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
     if (filters.thunderstorms) {
       thunderstormAlerts.forEach((alert) => {
         const icon = L.divIcon({
-          className: alert.isNew ? 'hazard-marker flash-in' : 'hazard-marker pulse',
-          html: `<div style="background: hsl(280, 100%, 70%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg></div>`,
+          className: 'hazard-marker',
+          html: `<div class="${alert.isNew ? 'flash-in' : 'pulse'}" style="background: hsl(280, 100%, 70%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg></div>`,
           iconSize: [32, 32],
+          iconAnchor: [16, 16],
         });
         const marker = L.marker([alert.location.lat, alert.location.lon], { icon }).addTo(map.current!);
         layers.current[`thunderstorm-${alert.id}`] = marker;

@@ -45,6 +45,7 @@ export const handler = async (event: any): Promise<any> => {
       JSON.stringify({
         type: 'Hazard',
         data: {
+          hazardId: newRecord.SK.split('#')[1],
           type: newRecord.type,
           lat: newRecord.lat,
           lon: newRecord.lon,
@@ -60,6 +61,7 @@ export const handler = async (event: any): Promise<any> => {
           JSON.stringify({
             type: 'Alert',
             data: {
+              hazardId: newRecord.SK.split('#')[1],
               routeId: route.SK.split('#')[1],
               type: newRecord.type,
               lat: newRecord.lat,

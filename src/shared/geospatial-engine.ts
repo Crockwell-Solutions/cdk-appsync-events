@@ -76,7 +76,7 @@ export async function createRouteRecord(ddb: DynamoDBDocumentClient, route: Arra
       PK: 'ROUTE',
       SK: `ROUTE#${routeId}`,
       routePoints: route,
-      ttl: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days TTL
+      ttl: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour TTL
     },
   });
   await ddb.send(params);
