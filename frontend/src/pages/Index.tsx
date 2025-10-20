@@ -52,6 +52,38 @@ const Index = () => {
           const location = { lat: event.data.lat, lon: event.data.lon };
           const alertId = event.data.hazardId;
 
+          // Handle Alert type - flash matching route and hazard
+          if (event.type === 'Alert' && event.data.routeId) {
+            const matchingRouteId = event.data.routeId;
+            
+            // Flash the route permanently
+            setFlightRoutes((prev) => 
+              prev.map(r => r.routeId === matchingRouteId ? { ...r, isFlashing: true } : r)
+            );
+
+            // Flash the hazard permanently based on type
+            if (hazardType === 'Airspace Alert') {
+              setAirspaceAlerts((prev) => 
+                prev.map(a => a.id === alertId ? { ...a, isFlashing: true } : a)
+              );
+            } else if (hazardType === 'Bird Activity') {
+              setBirdAlerts((prev) => 
+                prev.map(a => a.id === alertId ? { ...a, isFlashing: true } : a)
+              );
+            } else if (hazardType === 'Drone Activity') {
+              setDroneAlerts((prev) => 
+                prev.map(a => a.id === alertId ? { ...a, isFlashing: true } : a)
+              );
+            } else if (hazardType === 'Thunderstorm') {
+              setThunderstormAlerts((prev) => 
+                prev.map(a => a.id === alertId ? { ...a, isFlashing: true } : a)
+              );
+            }
+            
+            toast.error(`Alert: Hazard impacts your route!`);
+          }
+
+          // Handle Hazard type - add new hazards
           if (hazardType === 'Airspace Alert') {
             setAirspaceAlerts((prev) => {
               if (prev.some(a => a.id === alertId)) return prev;
@@ -140,9 +172,10 @@ const Index = () => {
     }
 
     try {
-      await apiClient.post('/submit-route', { points: routePoints });
+      const response = await apiClient.post<{ routeId: string; routeDistance: number }>('/submit-route', { points: routePoints });
       const newRoute: FlightRoute = {
         id: `route-${Date.now()}`,
+        routeId: response.routeId,
         points: routePoints,
         timestamp: Date.now(),
       };

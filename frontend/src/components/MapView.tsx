@@ -71,7 +71,7 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
       flightRoutes.forEach((route) => {
         const polyline = L.polyline(
           route.points.map(p => [p.lat, p.lon]),
-          { color: '#34D399', weight: 3, opacity: 0.8 }
+          { color: route.isFlashing ? '#EF4444' : '#34D399', weight: 3, opacity: 0.8, className: route.isFlashing ? 'flash-red' : '' }
         ).addTo(map.current!);
         layers.current[`route-${route.id}`] = polyline;
 
@@ -79,9 +79,10 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
           const startPoint = route.points[0];
           const endPoint = route.points[route.points.length - 1];
           
+          const bgColor = route.isFlashing ? '#EF4444' : '#34D399';
           const planeIcon = L.divIcon({
             className: 'plane-marker',
-            html: '<div style="background: #34D399; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>',
+            html: `<div style="background: ${bgColor}; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>`,
             iconSize: [24, 24],
           });
 
@@ -102,6 +103,7 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
           fillColor: '#EF4444',
           fillOpacity: 0.3,
           weight: 2,
+          className: alert.isFlashing ? 'flash-red' : '',
         }).addTo(map.current!);
         layers.current[`airspace-${alert.id}`] = circle;
       });
@@ -109,9 +111,11 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
 
     if (filters.birds) {
       birdAlerts.forEach((alert) => {
+        const animationClass = alert.isFlashing ? 'flash-red' : (alert.isNew ? 'flash-in' : 'pulse');
+        const bgColor = alert.isFlashing ? '#EF4444' : 'hsl(45, 93%, 47%)';
         const icon = L.divIcon({
           className: 'hazard-marker',
-          html: `<div class="${alert.isNew ? 'flash-in' : 'pulse'}" style="background: hsl(45, 93%, 47%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg></div>`,
+          html: `<div class="${animationClass}" style="background: ${bgColor}; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg></div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
@@ -122,9 +126,11 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
 
     if (filters.drones) {
       droneAlerts.forEach((alert) => {
+        const animationClass = alert.isFlashing ? 'flash-red' : (alert.isNew ? 'flash-in' : 'pulse');
+        const bgColor = alert.isFlashing ? '#EF4444' : 'hsl(271, 91%, 65%)';
         const icon = L.divIcon({
           className: 'hazard-marker',
-          html: `<div class="${alert.isNew ? 'flash-in' : 'pulse'}" style="background: hsl(271, 91%, 65%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.04 4.05A10 10 0 1 1 19.96 19.95A10 10 0 0 1 4.04 4.05z"/><path d="M13.34 8.5l-5 2.5 5 2.5 2.5 5 2.5-5 5-2.5-5-2.5-2.5-5z"/></svg></div>`,
+          html: `<div class="${animationClass}" style="background: ${bgColor}; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.04 4.05A10 10 0 1 1 19.96 19.95A10 10 0 0 1 4.04 4.05z"/><path d="M13.34 8.5l-5 2.5 5 2.5 2.5 5 2.5-5 5-2.5-5-2.5-2.5-5z"/></svg></div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
@@ -135,9 +141,11 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
 
     if (filters.thunderstorms) {
       thunderstormAlerts.forEach((alert) => {
+        const animationClass = alert.isFlashing ? 'flash-red' : (alert.isNew ? 'flash-in' : 'pulse');
+        const bgColor = alert.isFlashing ? '#EF4444' : 'hsl(280, 100%, 70%)';
         const icon = L.divIcon({
           className: 'hazard-marker',
-          html: `<div class="${alert.isNew ? 'flash-in' : 'pulse'}" style="background: hsl(280, 100%, 70%); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg></div>`,
+          html: `<div class="${animationClass}" style="background: ${bgColor}; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid white;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg></div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
@@ -241,6 +249,17 @@ const MapView = ({ flightRoutes, airspaceAlerts, birdAlerts, droneAlerts, thunde
           100% {
             transform: scale(1);
             opacity: 1;
+          }
+        }
+        .flash-red {
+          animation: flash-red 2s ease-in-out infinite;
+        }
+        @keyframes flash-red {
+          0%, 100% {
+            filter: brightness(1);
+          }
+          50% {
+            filter: brightness(2) hue-rotate(-30deg);
           }
         }
       `}</style>

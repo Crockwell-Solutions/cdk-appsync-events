@@ -22,10 +22,10 @@ export type BoundingBox = { latMin: number; lonMin: number; latMax: number; lonM
  *
  * @param route - An array of points defining the route.
  * @param geoPoint - The geo point to check.
- * @param bufferMeters - The maximum distance in meters from the route to consider a point as "near" (default is 50km).
+ * @param bufferMeters - The maximum distance in meters from the route to consider a point as "near" (default is 20km).
  * @returns True if the geo point is near the route, false otherwise.
  */
-export function isPointNearRoute(route: [Point], geoPoint: Point, bufferMeters = 50000): boolean {
+export function isPointNearRoute(route: [Point], geoPoint: Point, bufferMeters = 20000): boolean {
   for (let i = 0; i < route.length - 1; i++) {
     const start = route[i];
     const end = route[i + 1];
