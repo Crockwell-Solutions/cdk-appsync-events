@@ -17,7 +17,7 @@
     "deploy:frontend": "cp frontend/src/cdk-output.json frontend/public/cdk-output.json 2>/dev/null || true && npm --prefix frontend run build && cdk deploy --app='npx ts-node --prefer-ts-exts bin/airspace-alerter-frontend.ts' --require-approval never",
     "destroy": "npm run destroy:frontend && npm run destroy:backend",
     "destroy:backend": "cdk destroy --all",
-    "destroy:frontend": "cdk destroy --app='npx ts-node --prefer-ts-exts bin/appsync-events-frontend.ts'",
+    "destroy:frontend": "cdk destroy --app='npx ts-node --prefer-ts-exts bin/airspace-alerter-frontend.ts'",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",
